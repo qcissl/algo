@@ -36,12 +36,7 @@ public class ArrayList<T> implements List<T> {
 
     @Override
     public boolean contains(Object o) {
-        for(T t:data){
-            if (t.equals(o)){
-                return true;
-            }
-        }
-        return false;
+        return indexOf(o) > 0;
     }
 
     @Override
@@ -68,37 +63,35 @@ public class ArrayList<T> implements List<T> {
 
     @Override
     public boolean add(T t) {
-        if (data.length == size()){
-            resize(data.length * 2);
-        }
+        resize(size + 1);
         data[size] = t;
         size++;
         return true;
     }
 
     private void resize(int capacity) {
-        T[] temp = data;
-        data = (T[]) new Object[capacity];
-        for(int i = 0; i < size(); i++) {
-            data[i] = temp[i];
+        if (capacity > data.length){
+            int oldSize = data.length;
+            int newSize = oldSize + (oldSize >> 1);
+            if (newSize < capacity){
+                newSize = capacity;
+            }
+            data = Arrays.copyOf(data,newSize);
         }
     }
 
     @Override
     public boolean remove(Object o) {
-        boolean b = false;
+        int index = -1;
         for(int i = 0; i < size(); i++) {
-            if (b || data[i].equals(o)){
-                b = true;
-                if (size() == i+1){
-                    data[i] = null;
-                    size --;
-                }else {
-                    data[i] = data[i+1];
-                }
+            if (o.equals(data[i])){
+                index = i;
             }
         }
-        return b;
+        if (index >= 0){
+            remove(index);
+        }
+        return index >= 0;
     }
 
     @Override
@@ -154,9 +147,7 @@ public class ArrayList<T> implements List<T> {
     @Override
     public void add(int index, T element) {
         checkIndex(index);
-        if (data.length == size()){
-            resize(data.length * 2);
-        }
+        resize(size + 1);
         int t = size() - index;
         if (t > 0){
             System.arraycopy(data,index,data,index+1,t);
@@ -185,9 +176,17 @@ public class ArrayList<T> implements List<T> {
 
     @Override
     public int indexOf(Object o) {
-        for(int i = 0; i < size(); i++) {
-            if (data[i].equals(o)){
-                return i;
+        if (o == null){
+            for(int i = 0; i < size(); i++) {
+                if (data[i] == null){
+                    return i;
+                }
+            }
+        }else {
+            for(int i = 0; i < size(); i++) {
+                if (o.equals(data[i])){
+                    return i;
+                }
             }
         }
         return -1;
@@ -195,9 +194,17 @@ public class ArrayList<T> implements List<T> {
 
     @Override
     public int lastIndexOf(Object o) {
-        for(int i = size()-1; i >= 0; i--) {
-            if (data[i].equals(o)){
-                return i;
+        if (o == null){
+            for(int i = size()-1; i >= 0; i--) {
+                if (data[i] == null){
+                    return i;
+                }
+            }
+        }else {
+            for(int i = size()-1; i >= 0; i--) {
+                if (o.equals(data[i])){
+                    return i;
+                }
             }
         }
         return -1;

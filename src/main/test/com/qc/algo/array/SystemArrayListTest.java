@@ -15,11 +15,6 @@ public class SystemArrayListTest {
         for(int i = 0; i < 10; i++) {
             list.add(i+1);
         }
-
-        List<Integer> list1 = new ArrayList<>();
-        list1.add(12);
-        list1.add(13);
-        System.out.println(list.addAll(10,list1));
-        System.out.println(list);
+        System.out.println(list.remove(-1));
     }
 }
