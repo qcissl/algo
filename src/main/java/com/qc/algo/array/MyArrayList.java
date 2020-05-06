@@ -7,17 +7,17 @@ import java.util.*;
  *
  * @author qinc 2020/05/06 13:46
  */
-public class ArrayList<T> implements List<T> {
+public class MyArrayList<T> implements List<T> {
 
     private int size;
     private T[] data;
 
-    public ArrayList(int size) {
+    public MyArrayList(int size) {
         data = (T[]) new Object[size];
         this.size = 0;
     }
 
-    public ArrayList() {
+    public MyArrayList() {
         this(10);
     }
 
@@ -63,7 +63,7 @@ public class ArrayList<T> implements List<T> {
 
     @Override
     public boolean add(T t) {
-        resize(size + 1);
+        resize(size() + 1);
         data[size] = t;
         size++;
         return true;
@@ -96,25 +96,43 @@ public class ArrayList<T> implements List<T> {
 
     @Override
     public boolean containsAll(Collection<?> c) {
-        return false;
-    }
-
-    @Override
-    public boolean addAll(Collection<? extends T> c) {
-        for(T t : c) {
-            add(t);
+        for(Object o:c){
+            if (!contains(o)){
+                return false;
+            }
         }
         return true;
     }
 
     @Override
+    public boolean addAll(Collection<? extends T> c) {
+        resize(size() + c.size());
+        Object[] objects = c.toArray();
+        System.arraycopy(objects,0,data,size,objects.length);
+        size += objects.length;
+        return objects.length > 0;
+    }
+
+    @Override
     public boolean addAll(int index, Collection<? extends T> c) {
-        return false;
+        checkIndexOfAdd(index);
+        resize(size() + c.size());
+        Object[] objects = c.toArray();
+        int t = size() - index;
+        if (t > 0){
+            System.arraycopy(data,index,data,index+c.size(),t);
+        }
+        System.arraycopy(objects,0,data,index,c.size());
+        size += c.size();
+        return c.size() > 0;
     }
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        return false;
+        for(Object o:c){
+            remove(o);
+        }
+        return true;
     }
 
     @Override
@@ -146,8 +164,8 @@ public class ArrayList<T> implements List<T> {
 
     @Override
     public void add(int index, T element) {
-        checkIndex(index);
-        resize(size + 1);
+        checkIndexOfAdd(index);
+        resize(size() + 1);
         int t = size() - index;
         if (t > 0){
             System.arraycopy(data,index,data,index+1,t);
@@ -170,6 +188,11 @@ public class ArrayList<T> implements List<T> {
 
     private void checkIndex(int index) {
         if (index<0 || index >= size()){
+            throw new IllegalArgumentException("index outbound in array");
+        }
+    }
+    private void checkIndexOfAdd(int index) {
+        if (index<0 || index > size()){
             throw new IllegalArgumentException("index outbound in array");
         }
     }
