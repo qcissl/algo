@@ -1,6 +1,7 @@
 package com.qc.algo.array;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * description
@@ -41,7 +42,7 @@ public class MyArrayList<T> implements List<T> {
 
     @Override
     public Iterator<T> iterator() {
-        return null;
+        return new Itr();
     }
 
     @Override
@@ -129,15 +130,40 @@ public class MyArrayList<T> implements List<T> {
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        for(Object o:c){
-            remove(o);
+        Objects.requireNonNull(c);
+        return batchRemove(c,false);
+    }
+
+    private boolean batchRemove(Collection<?> c, boolean complement) {
+        Object[] objs = c.toArray();
+        int w = 0,r = 0;
+        boolean b = false;
+        try {
+            for(;r < size(); r++) {
+                if (c.contains(get(r)) == complement){
+                    set(w++,get(r));
+                }
+            }
+        }finally {
+            if (r != size()){
+                System.arraycopy(data,r,data,w,size()-r);
+                w += size() - r;
+            }
+            if (w != size()){
+                for(int i = w; i < size(); i++) {
+                    data[i] = null;
+                }
+                size = w;
+            }
+            b = true;
         }
-        return true;
+        return b;
     }
 
     @Override
     public boolean retainAll(Collection<?> c) {
-        return false;
+        Objects.requireNonNull(c);
+        return batchRemove(c,true);
     }
 
     @Override
@@ -251,5 +277,35 @@ public class MyArrayList<T> implements List<T> {
     @Override
     public String toString() {
         return Arrays.toString(data);
+    }
+
+    private class Itr implements Iterator<T>{
+
+        private int cursor;
+        private int lastRet = -1;
+
+        @Override
+        public boolean hasNext() {
+            return cursor != size();
+        }
+
+        @Override
+        public T next() {
+            checkIndex(cursor);
+            int i = cursor;
+            cursor++;
+            lastRet = i;
+            return get(lastRet);
+        }
+
+        @Override
+        public void remove() {
+            if (lastRet < 0){
+                throw new IllegalStateException();
+            }
+            MyArrayList.this.remove(lastRet);
+            cursor = lastRet;
+            lastRet = -1;
+        }
     }
 }
